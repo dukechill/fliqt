@@ -4,17 +4,17 @@ import (
 	"io"
 
 	"fliqt/config"
+	"fliqt/internal/lib"
 	"fliqt/internal/repository"
 	"fliqt/internal/service"
-	"fliqt/internal/util"
 	"github.com/gin-gonic/gin"
 
-	"fliqt/internal/handler"
+	"fliqt/internal/middleware"
 )
 
 func main() {
 	cfg := config.NewConfig()
-	logger := util.NewLogger(cfg)
+	logger := lib.NewLogger(cfg)
 
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
@@ -23,46 +23,37 @@ func main() {
 	}
 	app := gin.Default()
 
-	s3PresignClient, err := util.NewS3PresignClient(cfg)
+	db, err := lib.NewGormDB(cfg)
 	if err != nil {
 		panic(err)
 	}
 
-	db, err := util.NewGormDB(cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	redisClient, err := util.NewClient(cfg)
-	if err != nil {
-		panic(err)
-	}
+	//redisClient, err := lib.NewClient(cfg)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	// Initialize repositories
-	jobRepo := repository.NewJobRepository(db, logger)
-	applicationRepo := repository.NewApplicationRepository(db, logger)
+	InterviewRepo := repository.NewInterviewRepository(db, logger)
 
 	// Initialize services
 	authService := service.NewAuthService(db)
-	s3Service := service.NewS3Service(cfg, redisClient, s3PresignClient)
 
 	// OpenTelemetry tracing, can be ignored when there's no setup for tracing when developing locally.
-	if err := util.InitTracer(cfg); err != nil {
+	if err := lib.InitTracer(cfg); err != nil {
 		logger.Info().Msgf("Failed to initialize tracer: %v", err)
 	}
 
-	app.Use(handler.Logger(logger))
-	app.Use(handler.ErrorHandler(logger))
-	app.NoRoute(handler.NotFoundHandler())
+	app.Use(middleware.Logger(logger))
+	app.Use(middleware.ErrorMiddleware(logger))
+	app.NoRoute(middleware.NotFoundHandler())
 
-	handler.NewRouter(
+	middleware.NewRouter(
 		cfg,
 		app,
 		logger,
-		jobRepo,
-		applicationRepo,
+		InterviewRepo,
 		authService,
-		s3Service,
 	)
 
 	if err := app.Run(); err != nil {

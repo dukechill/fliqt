@@ -3,9 +3,9 @@ package model
 type UserRole string
 
 const (
-	RoleHR         UserRole = "hr"
-	RoleInteviewer UserRole = "interviewer"
-	RoleCandidate  UserRole = "candidate"
+	RoleHR          UserRole = "hr"
+	RoleInterviewer UserRole = "interviewer"
+	RoleCandidate   UserRole = "candidate"
 )
 
 type User struct {
