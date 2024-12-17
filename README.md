@@ -81,11 +81,6 @@ DB_NAME=fliqt
 REDIS_URL=redis://redis:6379
 DEBUG=true
 ```
-
-⚠️ **Warning:**
-- Do not use the `.env` file in production environments. It is intended for local testing and development purposes only.
-- In production, use a secure method for managing environment variables, such as Kubernetes Secrets, AWS SSM, or other configuration management tools.
-
 ---
 
 ## **Project Structure**
