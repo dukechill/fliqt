@@ -11,13 +11,11 @@ import (
 	"time"
 
 	"fliqt/config"
+	"fliqt/internal/api/interview"
 	"fliqt/internal/lib"
-	"fliqt/internal/repository"
-	"fliqt/internal/service"
 	"github.com/gin-gonic/gin"
 
 	"fliqt/internal/lib/db"
-	"fliqt/internal/middleware"
 )
 
 const (
@@ -41,23 +39,9 @@ func main() {
 
 	router := gin.Default()
 
-	// Initialize repositories
-	InterviewRepo := repository.NewInterviewRepository(db, logger)
+	rg := router.Group("/api")
 
-	// Initialize services
-	authService := service.NewAuthService(db)
-
-	app.Use(middleware.Logger(logger))
-	app.Use(middleware.ErrorMiddleware(logger))
-	app.NoRoute(middleware.NotFoundHandler())
-
-	middleware.NewRouter(
-		cfg,
-		app,
-		logger,
-		InterviewRepo,
-		authService,
-	)
+	interview.Route(rg)
 
 	srv := &http.Server{
 		Addr:           fmt.Sprintf(":%d", "8080"),
@@ -70,7 +54,7 @@ func main() {
 	go func() {
 		// service connections
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logs.Systemf("Server listen error: %v", err)
+			fmt.Printf("Server listen error: %v\n", err)
 		}
 	}()
 
@@ -78,12 +62,12 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit
-	logs.Systemf("Shutdown Server with signal %v", sig)
+	fmt.Printf("Shutdown Server with signal %v\n", sig)
 
 	ctx, cancel := context.WithTimeout(context.Background(), defReadTimeout)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		logs.Systemf("Server Shutdown err: %v", err)
+		fmt.Printf("Server Shutdown err: %v\n", err)
 	}
-	logs.Systemf("Server exiting")
+	fmt.Println("Server exiting")
 }
