@@ -83,11 +83,12 @@ func TestUpdateInterview(t *testing.T) {
 	service := NewInterviewService(db)
 
 	dto := UpdateInterviewDTO{
-		Status:        3,
+		Status:        2, // 將狀態設置為 "In Progress"
 		ScheduledTime: "2024-01-01T10:00:00Z",
-		Notes:         "Final round completed",
+		Notes:         "Interview in progress",
 	}
 
+	// 模擬 SQL 更新邏輯
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "interviews"`).
 		WithArgs(dto.Status, dto.ScheduledTime, dto.Notes, "1").
@@ -98,6 +99,7 @@ func TestUpdateInterview(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
+	assert.Equal(t, 2, int(result.Status)) // 確認狀態正確更新為 "In Progress"
 }
 
 func TestDeleteInterview(t *testing.T) {

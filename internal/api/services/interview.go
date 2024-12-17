@@ -143,20 +143,38 @@ func (dto UpdateInterviewDTO) Validate() error {
 	return nil
 }
 
-// UpdateInterview updates an interview
+// UpdateInterview updates an interview with state machine logic
 func (r *InterviewService) UpdateInterview(ctx context.Context, ID string, dto UpdateInterviewDTO) (*model.Interview, error) {
+	// 取得面試記錄
+	interview, err := r.GetInterviewByID(ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if dto.Status >= 0 && dto.Status <= 5 {
+		stateCtx := NewInterviewContext(interview.Status)
+
+		if stateCtx.GetCurrentStatus() != model.InterviewStatus(dto.Status) {
+			if err := stateCtx.Transition(); err != nil {
+				return nil, errors.New("invalid status transition")
+			}
+			interview.Status = stateCtx.GetCurrentStatus()
+		}
+	}
+
 	updates := map[string]interface{}{}
 	if dto.ScheduledTime != "" {
 		updates["scheduled_time"] = dto.ScheduledTime
-	}
-	if dto.Status >= 0 && dto.Status <= 5 {
-		updates["status"] = dto.Status
 	}
 	if dto.Notes != "" {
 		updates["notes"] = dto.Notes
 	}
 
 	if err := r.db.Model(&model.Interview{}).Where("id = ?", ID).Updates(updates).Error; err != nil {
+		return nil, err
+	}
+
+	if err := r.db.Save(&interview).Error; err != nil {
 		return nil, err
 	}
 
