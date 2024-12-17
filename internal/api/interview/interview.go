@@ -19,7 +19,7 @@ func ListInterviews(ctx *gin.Context) {
 	filterParams.Normalize()
 	conn := db.DBGorm
 	srv := services.NewInterviewService(conn)
-	accounts, err := srv.ListInterviews(ctx, filterParams)
+	accounts, err := srv.ListInterviews(filterParams)
 
 	if err != nil {
 		ctx.Error(err)
@@ -38,7 +38,7 @@ func GetInterviews(ctx *gin.Context) {
 	}
 	conn := db.DBGorm
 	srv := services.NewInterviewService(conn)
-	interviewer, err := srv.GetInterviewByID(ctx, id)
+	interviewer, err := srv.GetInterviewByID(id)
 
 	if err != nil {
 		ctx.Error(err)
@@ -62,7 +62,7 @@ func CreateInterviews(ctx *gin.Context) {
 	conn := db.DBGorm
 	srv := services.NewInterviewService(conn)
 
-	interviewer, err := srv.CreateInterview(ctx, req)
+	interviewer, err := srv.CreateInterview(req)
 
 	if err != nil {
 		ctx.Error(err)
@@ -111,7 +111,7 @@ func DeleteInterviews(ctx *gin.Context) {
 	}
 	conn := db.DBGorm
 	srv := services.NewInterviewService(conn)
-	err := srv.DeleteInterview(ctx, ID)
+	err := srv.DeleteInterview(ID)
 
 	if err != nil {
 		ctx.Error(err)

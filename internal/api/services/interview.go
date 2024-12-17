@@ -44,7 +44,7 @@ type InterviewResponseDTO struct {
 }
 
 // ListInterviews returns a list of interviews
-func (r *InterviewService) ListInterviews(ctx context.Context, filterParams InterviewFilterParams) (model.PaginationResponse[InterviewResponseDTO], error) {
+func (r *InterviewService) ListInterviews(filterParams InterviewFilterParams) (model.PaginationResponse[InterviewResponseDTO], error) {
 	var interviews []InterviewResponseDTO
 	query := r.db.Model(&model.Interview{}).Order("id DESC")
 
@@ -149,7 +149,7 @@ func (r *InterviewService) UpdateInterview(ctx context.Context, ID string, dto U
 		return nil, err
 	}
 
-	return r.GetInterviewByID(ctx, ID)
+	return r.GetInterviewByID(ID)
 }
 
 // DeleteInterview deletes an interview
