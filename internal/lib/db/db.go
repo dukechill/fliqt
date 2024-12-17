@@ -2,7 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
+	"time"
 
+	"fliqt/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
@@ -18,7 +21,55 @@ var (
 	DBReaderGorm *gorm.DB
 )
 
-func Init() {
+func Init(cfg *config.Config) {
+	var err error
+	if cfg.Adapter == "mysql" {
+		dsn := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?%v",
+			cfg.DBUser,
+			cfg.DBPassword,
+			cfg.DBProtocol,
+			cfg.DBHost,
+			cfg.DBPort,
+			cfg.DBName,
+			cfg.DBParams,
+		)
+
+		DB, err = sql.Open("mysql", dsn)
+		if err != nil {
+			panic(err)
+		}
+		
+		DB.SetMaxOpenConns(cfg.DBMaxOpenConns)
+		DB.SetMaxIdleConns(cfg.DBMaxOpenConns - 5)
+
+		DB.SetConnMaxLifetime(30 * time.Second)
+
+		readerDsn := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?%v",
+			cfg.DBUser,
+			cfg.DBPassword,
+			cfg.DBProtocol,
+			cfg.DBHost,
+			cfg.DBPort,
+			cfg.DBName,
+			cfg.DBParams)
+
+		DBReader, err = sql.Open("mysql", readerDsn)
+		// if replica connection failed, read master config
+		if err != nil {
+			DBReader, err = sql.Open("mysql", dsn)
+
+			DBReader.SetMaxOpenConns(cfg.DBMaxOpenConns)
+			DBReader.SetMaxIdleConns(cfg.DBMaxOpenConns - 5)
+		} else {
+			DBReader.SetMaxOpenConns(cfg.DBMaxOpenConns)
+			DBReader.SetMaxIdleConns(cfg.DBMaxOpenConns - 5)
+		}
+		DBReader.SetConnMaxLifetime(30 * time.Second)
+	}
+	if err != nil {
+		panic(err)
+	}
+
 	if DB == nil {
 		panic("DB nil")
 	}
