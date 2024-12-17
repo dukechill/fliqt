@@ -12,6 +12,7 @@ FLIQT is a backend service for a Human Resource Management System, created as a 
 4. [Main Commands](#main-commands)
 5. [Environment Variables](#environment-variables)
 6. [Project Structure](#project-structure)
+7. [Warnings](#warnings)
 
 ---
 
@@ -79,6 +80,10 @@ REDIS_URL=redis://redis:6379
 DEBUG=true
 ```
 
+⚠️ **Warning:**
+- Do not use the `.env` file in production environments. It is intended for local testing and development purposes only.
+- In production, use a secure method for managing environment variables, such as Kubernetes Secrets, AWS SSM, or other configuration management tools.
+
 ---
 
 ## **Project Structure**
@@ -89,12 +94,18 @@ fliqt/
 ├── Dockerfile                 # Docker build configuration
 ├── docker-compose.yml         # Multi-service orchestration
 ├── makefile                   # Convenient command execution
-├── main.go                    # Project entry point
 ├── go.mod                     # Go module configuration
+├── go.sum                     # Go dependencies checksum
 ├── config/                    # Configuration logic
+├── cmd/                       # Application entry points
+│   ├── main/                  # Service startup logic
+│   └── migrate/               # Migration tool entry point
 ├── internal/                  
-│   ├── middleware/               # API request middleware
-│   └── repository/            # Data access logic
+│   ├── api/                   # API routing and handlers
+│   │   └── interview/         # Interview-related API routes
+│   ├── model/                 # Data models
+│   ├── middleware/            # Middleware logic
+│   └── services/              # Business logic layer
 └── tests/                     # Test code
 ```
 
@@ -105,6 +116,14 @@ fliqt/
 - Add user authentication and authorization (JWT).
 - Provide more unit tests to improve test coverage.
 - Enhance API documentation with tools like Swagger.
+
+---
+
+## **Warnings**
+
+⚠️ **Important:**
+- The `.env` file provided in this repository is **not secure** and should not be used in production environments.
+- For production, ensure environment variables are managed securely and secrets are not exposed.
 
 ---
 
