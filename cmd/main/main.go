@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"fliqt/config"
 	"fliqt/internal/api/interview"
-	"fliqt/internal/lib"
 	"github.com/gin-gonic/gin"
 
 	"fliqt/internal/lib/db"
@@ -26,16 +26,13 @@ const (
 
 func main() {
 	cfg := config.NewConfig()
-	logger := lib.NewLogger(cfg)
-
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 		gin.DefaultWriter = io.Discard
 		gin.DefaultErrorWriter = io.Discard
 	}
-	app := gin.Default()
 
-	db.Init()
+	db.Init(cfg)
 
 	router := gin.Default()
 
@@ -44,7 +41,7 @@ func main() {
 	interview.Route(rg)
 
 	srv := &http.Server{
-		Addr:           fmt.Sprintf(":%d", "8080"),
+		Addr:           fmt.Sprintf(":%s", "8080"),
 		Handler:        router,
 		ReadTimeout:    defReadTimeout,
 		WriteTimeout:   defWriteTimeout,
@@ -52,13 +49,12 @@ func main() {
 	}
 
 	go func() {
-		// service connections
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			fmt.Printf("Server listen error: %v\n", err)
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout.
+	// Wait for interrupt signal to gracefully shut down the server with a timeout.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit

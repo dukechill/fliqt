@@ -9,15 +9,19 @@ import (
 )
 
 type Config struct {
-	DBHost        string
-	DBPort        string
-	DBUser        string
-	DBPassword    string
-	DBName        string
-	DBTimezone    string
-	DBMaxIdle     int
-	DBMaxConn     int
-	DBMaxLifeTime int
+	DBHost         string
+	DBPort         string
+	DBUser         string
+	DBPassword     string
+	DBName         string
+	DBTimezone     string
+	DBMaxIdle      int
+	DBMaxConn      int
+	DBMaxLifeTime  int
+	DBProtocol     string
+	DBMaxOpenConns int
+	DBParams       string
+	Adapter        string
 
 	Debug     bool
 	PrettyLog bool
@@ -35,15 +39,19 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		DBHost:        getEnv("DB_HOST", "localhost"),
-		DBPort:        getEnv("DB_PORT", "3306"),
-		DBUser:        getEnv("DB_USER", "root"),
-		DBPassword:    getEnv("DB_PASSWORD", "password"),
-		DBName:        getEnv("DB_NAME", "fliqt_test"),
-		DBTimezone:    getEnv("DB_TIMEZONE", "Etc/UTC"),
-		DBMaxIdle:     getEnvInt("DB_MAX_IDLE", 2),
-		DBMaxConn:     getEnvInt("DB_MAX_CONN", 10),
-		DBMaxLifeTime: getEnvInt("DB_MAX_LIFE", int(time.Minute*60)),
+		DBHost:         getEnv("DB_HOST", "localhost"),
+		DBPort:         getEnv("DB_PORT", "3306"),
+		DBUser:         getEnv("DB_USER", "root"),
+		DBPassword:     getEnv("DB_PASSWORD", "rootpassword"),
+		DBName:         getEnv("DB_NAME", "fliqt"),
+		DBTimezone:     getEnv("DB_TIMEZONE", "Etc/UTC"),
+		DBMaxIdle:      getEnvInt("DB_MAX_IDLE", 2),
+		DBMaxConn:      getEnvInt("DB_MAX_CONN", 10),
+		DBMaxLifeTime:  getEnvInt("DB_MAX_LIFE", int(time.Minute*60)),
+		Adapter:        getEnv("DB_ADAPTER", "mysql"),
+		DBProtocol:     getEnv("DB_PROTOCOL", "tcp"),
+		DBMaxOpenConns: getEnvInt("DB_MAX_OPEN_CONNS", 100),
+		DBParams:       getEnv("DB_PARAMS", "charset=utf8mb4,utf8&parseTime=True&timeout=5s&readTimeout=5s&writeTimeout=5s&sql_mode=''"),
 
 		Debug:     getEnv("DEBUG", "false") == "true",
 		PrettyLog: getEnv("PRETTY_LOG", "false") == "true",
