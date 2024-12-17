@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"fliqt/internal/model"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type InterviewService struct {
@@ -89,7 +89,7 @@ func (r *InterviewService) ListInterviews(filterParams InterviewFilterParams) (m
 func (r *InterviewService) GetInterviewByID(ID string) (*model.Interview, error) {
 	var interview model.Interview
 	if err := r.db.Where("id = ?", ID).First(&interview).Error; err != nil {
-		return nil, err
+		return nil, handleDBError(err)
 	}
 
 	return &interview, nil
@@ -145,7 +145,18 @@ func (dto UpdateInterviewDTO) Validate() error {
 
 // UpdateInterview updates an interview
 func (r *InterviewService) UpdateInterview(ctx context.Context, ID string, dto UpdateInterviewDTO) (*model.Interview, error) {
-	if err := r.db.Model(&model.Interview{}).Where("id = ?", ID).UpdateColumns(dto).Error; err != nil {
+	updates := map[string]interface{}{}
+	if dto.ScheduledTime != "" {
+		updates["scheduled_time"] = dto.ScheduledTime
+	}
+	if dto.Status >= 0 && dto.Status <= 5 {
+		updates["status"] = dto.Status
+	}
+	if dto.Notes != "" {
+		updates["notes"] = dto.Notes
+	}
+
+	if err := r.db.Model(&model.Interview{}).Where("id = ?", ID).Updates(updates).Error; err != nil {
 		return nil, err
 	}
 
@@ -159,4 +170,11 @@ func (r *InterviewService) DeleteInterview(ID string) error {
 	}
 
 	return nil
+}
+
+func handleDBError(err error) error {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New("record not found")
+	}
+	return err
 }

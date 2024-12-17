@@ -7,7 +7,8 @@ import (
 
 	"fliqt/config"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var (
@@ -38,7 +39,7 @@ func Init(cfg *config.Config) {
 		if err != nil {
 			panic(err)
 		}
-		
+
 		DB.SetMaxOpenConns(cfg.DBMaxOpenConns)
 		DB.SetMaxIdleConns(cfg.DBMaxOpenConns - 5)
 
@@ -84,12 +85,16 @@ func Init(cfg *config.Config) {
 func initGorm() {
 	var err error
 
-	DBGorm, err = gorm.Open("mysql", DB)
+	DBGorm, err = gorm.Open(mysql.New(mysql.Config{
+		Conn: DB,
+	}))
 	if err != nil {
 		panic(err)
 	}
 
-	DBReaderGorm, err = gorm.Open("mysql", DBReader)
+	DBReaderGorm, err = gorm.Open(mysql.New(mysql.Config{
+		Conn: DB,
+	}))
 	if err != nil {
 		panic(err)
 	}
