@@ -12,7 +12,9 @@ FLIQT is a backend service for a Human Resource Management System, created as a 
 4. [Main Commands](#main-commands)
 5. [Environment Variables](#environment-variables)
 6. [Project Structure](#project-structure)
-7. [Warnings](#warnings)
+7. [API Endpoints](#api-endpoints)
+8. [State Transition Logic](#state-transition-logic)
+9. [Warnings](#warnings)
 
 ---
 
@@ -98,7 +100,7 @@ fliqt/
 ├── go.sum                     # Go dependencies checksum
 ├── config/                    # Configuration logic
 ├── cmd/                       # Application entry points
-│   ├── main/                  # Service startup logic
+│   ├── main/                  # Service startup logic (main.go)
 │   └── migrate/               # Migration tool entry point
 ├── internal/                  
 │   ├── api/                   # API routing and handlers
@@ -106,8 +108,80 @@ fliqt/
 │   ├── model/                 # Data models
 │   ├── middleware/            # Middleware logic
 │   └── services/              # Business logic layer
-└── tests/                     # Test code
 ```
+
+---
+
+## **API Endpoints**
+
+The following endpoints are available in the system:
+
+### **Interview Management**
+
+1. **List Interviews**
+    - **Endpoint**: `GET /api/interviews`
+    - **Description**: Fetches a list of interviews with optional filtering (candidate name, position, status).
+
+2. **Get Interview by ID**
+    - **Endpoint**: `GET /api/interviews/:id`
+    - **Description**: Retrieves detailed information about a specific interview.
+
+3. **Create Interview**
+    - **Endpoint**: `POST /api/interviews`
+    - **Description**: Creates a new interview record.
+    - **Payload**:
+      ```json
+      {
+        "candidate_name": "John Doe",
+        "position": "Backend Engineer",
+        "status": 1,
+        "scheduled_time": "2024-01-10T10:00:00Z",
+        "notes": "First round technical interview."
+      }
+      ```
+
+4. **Update Interview**
+    - **Endpoint**: `PUT /api/interviews/:id`
+    - **Description**: Updates an existing interview's status, scheduled time, or notes.
+    - **Payload**:
+      ```json
+      {
+        "status": 2,
+        "scheduled_time": "2024-01-11T15:00:00Z",
+        "notes": "Updated notes for the interview."
+      }
+      ```
+
+5. **Delete Interview**
+    - **Endpoint**: `DELETE /api/interviews/:id`
+    - **Description**: Deletes an interview record by its ID.
+
+---
+
+## **State Transition Logic**
+
+The Interview status transitions are managed using a **State Machine** to ensure proper flow between states. The supported transitions are as follows:
+
+| Current Status      | Next Status        |
+|----------------------|---------------------|
+| Pending             | Scheduled          |
+| Scheduled           | In Progress        |
+| In Progress         | Completed          |
+| Completed           | None (Final State) |
+
+- Each state enforces valid transitions, ensuring that an invalid state change (e.g., skipping states) is not possible.
+
+### **State Transition Diagram**
+
+```mermaid
+graph TD
+    Pending --> Scheduled
+    Scheduled --> InProgress[In Progress]
+    InProgress --> Completed
+    Completed --> Completed[Final State]
+```
+
+The state machine logic is implemented in the `services/interview_state.go` file.
 
 ---
 
@@ -126,7 +200,3 @@ fliqt/
 - For production, ensure environment variables are managed securely and secrets are not exposed.
 
 ---
-
-**Project Maintainer**: `your-name`  
-**Version**: `v1.0.0`  
-**License**: MIT
