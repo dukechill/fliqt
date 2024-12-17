@@ -20,7 +20,7 @@ FLIQT is a backend service for a Human Resource Management System, created as a 
 
 ## **Project Features**
 
-- Basic functionalities for a Human Resource Management System.
+- Efficiently manages interview processes and statuses for HR teams.
 - Containerized deployment for easy setup.
 - Supports database migrations and basic testing.
 
