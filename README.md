@@ -1,46 +1,25 @@
 # FLIQT
 
-FLIQT is a modular Human Resource Management System backend service built with **Go (Golang)**, using the **Gin** framework to implement RESTful APIs. It integrates **MySQL** as the database, **Redis** as the caching system, and **MinIO** for object storage functionality.
-
-This project supports containerized deployment using **Docker Compose** to quickly start all required services. It also features database migrations and unit tests.
+FLIQT is a backend service for a Human Resource Management System, created as a demonstration project for interview purposes. The project includes basic functionalities and can be easily started using containerized deployment.
 
 ---
 
 ## **Table of Contents**
 
 1. [Project Features](#project-features)
-2. [Technology Stack](#technology-stack)
-3. [System Requirements](#system-requirements)
-4. [Installation and Execution](#installation-and-execution)
-5. [Main Commands](#main-commands)
-6. [Environment Variables](#environment-variables)
-7. [Project Structure](#project-structure)
-8. [Future Enhancements](#future-enhancements)
+2. [System Requirements](#system-requirements)
+3. [Installation and Execution](#installation-and-execution)
+4. [Main Commands](#main-commands)
+5. [Environment Variables](#environment-variables)
+6. [Project Structure](#project-structure)
 
 ---
 
 ## **Project Features**
 
-- **RESTful API**: Built with the high-performance Gin framework.
-- **Database**: MySQL integration with GORM for database operations and migrations.
-- **Caching System**: Redis for improved system performance.
-- **Object Storage**: MinIO provides S3-compatible storage.
-- **Containerized Deployment**: Quickly launch integrated services using Docker and Docker Compose.
-- **Version Management**: Automatic version tagging for easy maintenance.
-- **Unit Testing**: Built-in testing examples to ensure system stability.
-
----
-
-## **Technology Stack**
-
-- **Language**: Go (Golang)
-- **Framework**: Gin
-- **Database**: MySQL + GORM
-- **Cache**: Redis
-- **Object Storage**: MinIO
-- **Containerization**: Docker, Docker Compose
-- **Testing**: Go Testing Framework
-- **Version Control**: Git
+- Basic functionalities for a Human Resource Management System.
+- Containerized deployment for easy setup.
+- Supports database migrations and basic testing.
 
 ---
 
@@ -70,12 +49,6 @@ Use Docker Compose to launch all services:
 make docker-compose-run
 ```
 
-This will start:
-- MySQL
-- Redis
-- MinIO
-- FLIQT API service
-
 The API will run on `http://localhost:8080`.
 
 ---
@@ -86,10 +59,8 @@ The API will run on `http://localhost:8080`.
 |---------------------------|-------------------------------------|
 | `make dev-db-migrate`     | Run database migrations             |
 | `make dev-db-rollback`    | Roll back the last database migration |
-| `make docker-build`       | Build and push Docker image         |
 | `make docker-compose-run` | Start all services with Docker Compose |
 | `make clean`              | Clean up Docker resources           |
-| `make version`            | Display project version information |
 
 ---
 
@@ -137,15 +108,7 @@ fliqt/
 
 - Add user authentication and authorization (JWT).
 - Provide more unit tests to improve test coverage.
-- Integrate CI/CD pipelines for automated build and deployment.
 - Enhance API documentation with tools like Swagger.
-- Optimize Docker build for production environments.
-
----
-
-## **Contact Information**
-
-For any questions or suggestions, please contact [your-email@example.com].
 
 ---
 
