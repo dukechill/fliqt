@@ -1,25 +1,25 @@
 package interview
 
 import (
+	"fmt"
 	"net/http"
 
 	"fliqt/internal/api/services"
-	"fliqt/internal/lib"
-	"fliqt/internal/repository"
+	"fliqt/internal/lib/db"
 	"github.com/gin-gonic/gin"
 )
 
 func ListInterviews(ctx *gin.Context) {
-	var filterParams repository.InterviewFilterParams
+	var filterParams services.InterviewFilterParams
 	if err := ctx.ShouldBindQuery(&filterParams); err != nil {
 		ctx.Error(err)
 		return
 	}
 
 	filterParams.Normalize()
-
-	srv := services.NewInterviewService()
-	accounts, err := h.repo.ListInterviews(ctx, filterParams)
+	conn := db.DBGorm
+	srv := services.NewInterviewService(conn)
+	accounts, err := srv.ListInterviews(ctx, filterParams)
 
 	if err != nil {
 		ctx.Error(err)
@@ -29,28 +29,27 @@ func ListInterviews(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, accounts)
 }
 
-// GetInterviews is a middleware for getting job details.
+// GetInterviews is for getting interview details.
 func GetInterviews(ctx *gin.Context) {
-	tracerCtx, span := tracer.Start(ctx.Request.Context(), lib.GetSpanNameFromCaller())
-	defer span.End()
-
 	id := ctx.Param("id")
 	if id == "" {
-		ctx.Error(ErrNotFound)
+		ctx.Error(fmt.Errorf("invalid id"))
 		return
 	}
-	account, err := h.repo.GetInterviewByID(tracerCtx, id)
+	conn := db.DBGorm
+	srv := services.NewInterviewService(conn)
+	interviewer, err := srv.GetInterviewByID(ctx, id)
 
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, account)
+	ctx.JSON(http.StatusOK, interviewer)
 }
 
 func CreateInterviews(ctx *gin.Context) {
-	var req repository.CreateInterviewDTO
+	var req services.CreateInterviewDTO
 	if err := ctx.BindJSON(&req); err != nil {
 		ctx.Error(err)
 		return
@@ -60,19 +59,21 @@ func CreateInterviews(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+	conn := db.DBGorm
+	srv := services.NewInterviewService(conn)
 
-	job, err := h.repo.CreateInterview(ctx, req)
+	interviewer, err := srv.CreateInterview(ctx, req)
 
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, job)
+	ctx.JSON(http.StatusCreated, interviewer)
 }
 
 func UpdateInterviews(ctx *gin.Context) {
-	var req repository.UpdateInterviewDTO
+	var req services.UpdateInterviewDTO
 	if err := ctx.BindJSON(&req); err != nil {
 		ctx.Error(err)
 		return
@@ -80,7 +81,7 @@ func UpdateInterviews(ctx *gin.Context) {
 
 	ID := ctx.Param("id")
 	if ID == "" {
-		ctx.Error(ErrNotFound)
+		ctx.Error(fmt.Errorf("invalid id"))
 		return
 	}
 
@@ -89,7 +90,10 @@ func UpdateInterviews(ctx *gin.Context) {
 		return
 	}
 
-	job, err := h.repo.UpdateInterview(ctx, ID, req)
+	conn := db.DBGorm
+	srv := services.NewInterviewService(conn)
+
+	job, err := srv.UpdateInterview(ctx, ID, req)
 
 	if err != nil {
 		ctx.Error(err)
@@ -102,11 +106,12 @@ func UpdateInterviews(ctx *gin.Context) {
 func DeleteInterviews(ctx *gin.Context) {
 	ID := ctx.Param("id")
 	if ID == "" {
-		ctx.Error(ErrNotFound)
+		ctx.Error(fmt.Errorf("invalid id"))
 		return
 	}
-
-	err := h.repo.DeleteInterview(ctx, ID)
+	conn := db.DBGorm
+	srv := services.NewInterviewService(conn)
+	err := srv.DeleteInterview(ctx, ID)
 
 	if err != nil {
 		ctx.Error(err)

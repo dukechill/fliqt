@@ -5,22 +5,18 @@ import (
 	"errors"
 
 	"fliqt/internal/model"
-	"github.com/rs/zerolog"
-	"gorm.io/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type InterviewService struct {
-	db     *gorm.DB
-	logger *zerolog.Logger
+	db *gorm.DB
 }
 
 func NewInterviewService(
 	db *gorm.DB,
-	logger *zerolog.Logger,
 ) *InterviewService {
 	return &InterviewService{
-		db:     db,
-		logger: logger,
+		db: db,
 	}
 }
 
@@ -50,7 +46,7 @@ type InterviewResponseDTO struct {
 // ListInterviews returns a list of interviews
 func (r *InterviewService) ListInterviews(ctx context.Context, filterParams InterviewFilterParams) (model.PaginationResponse[InterviewResponseDTO], error) {
 	var interviews []InterviewResponseDTO
-	query := r.db.WithContext(ctx).Model(&model.Interview{}).Order("id DESC")
+	query := r.db.Model(&model.Interview{}).Order("id DESC")
 
 	if filterParams.CandidateName != "" {
 		query = query.Where("candidate_name LIKE ?", "%"+filterParams.CandidateName+"%")
@@ -90,9 +86,9 @@ func (r *InterviewService) ListInterviews(ctx context.Context, filterParams Inte
 }
 
 // GetInterviewByID returns an interview by its ID
-func (r *InterviewService) GetInterviewByID(ctx context.Context, ID string) (*model.Interview, error) {
+func (r *InterviewService) GetInterviewByID(ID string) (*model.Interview, error) {
 	var interview model.Interview
-	if err := r.db.WithContext(ctx).Where("id = ?", ID).First(&interview).Error; err != nil {
+	if err := r.db.Where("id = ?", ID).First(&interview).Error; err != nil {
 		return nil, err
 	}
 
@@ -119,7 +115,7 @@ func (dto CreateInterviewDTO) Validate() error {
 }
 
 // CreateInterview creates a new interview
-func (r *InterviewService) CreateInterview(ctx context.Context, dto CreateInterviewDTO) (*model.Interview, error) {
+func (r *InterviewService) CreateInterview(dto CreateInterviewDTO) (*model.Interview, error) {
 	interview := model.Interview{
 		CandidateName: dto.CandidateName,
 		Position:      dto.Position,
@@ -127,7 +123,7 @@ func (r *InterviewService) CreateInterview(ctx context.Context, dto CreateInterv
 		Notes:         dto.Notes,
 	}
 
-	if err := r.db.WithContext(ctx).Create(&interview).Error; err != nil {
+	if err := r.db.Create(&interview).Error; err != nil {
 		return nil, err
 	}
 
@@ -149,7 +145,7 @@ func (dto UpdateInterviewDTO) Validate() error {
 
 // UpdateInterview updates an interview
 func (r *InterviewService) UpdateInterview(ctx context.Context, ID string, dto UpdateInterviewDTO) (*model.Interview, error) {
-	if err := r.db.WithContext(ctx).Model(&model.Interview{}).Where("id = ?", ID).UpdateColumns(dto).Error; err != nil {
+	if err := r.db.Model(&model.Interview{}).Where("id = ?", ID).UpdateColumns(dto).Error; err != nil {
 		return nil, err
 	}
 
@@ -157,8 +153,8 @@ func (r *InterviewService) UpdateInterview(ctx context.Context, ID string, dto U
 }
 
 // DeleteInterview deletes an interview
-func (r *InterviewService) DeleteInterview(ctx context.Context, ID string) error {
-	if err := r.db.WithContext(ctx).Where("id = ?", ID).Delete(&model.Interview{}).Error; err != nil {
+func (r *InterviewService) DeleteInterview(ID string) error {
+	if err := r.db.Where("id = ?", ID).Delete(&model.Interview{}).Error; err != nil {
 		return err
 	}
 
