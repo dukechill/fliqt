@@ -1,0 +1,22 @@
+# Go build artifacts
+/bin/
+/pkg/
+/*.exe
+/*.test
+/*.out
+
+# Dependency directories
+vendor/
+
+# IDE settings
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+*.DS_Store
+
+# Docker
+docker-compose.override.yml
