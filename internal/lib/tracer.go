@@ -1,11 +1,12 @@
-package util
+package lib
 
 import (
 	"context"
-	"fliqt/config"
 	"runtime"
 	"strings"
 	"time"
+
+	"fliqt/config"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"

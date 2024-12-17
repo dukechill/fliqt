@@ -76,10 +76,6 @@ DB_PASSWORD=rootpassword
 DB_NAME=fliqt
 
 REDIS_URL=redis://redis:6379
-S3_ENDPOINT=http://minio:9000
-S3_BUCKET=fliqt
-S3_KEY=minioadmin
-S3_SECRET=minioadmin
 DEBUG=true
 ```
 
@@ -97,7 +93,7 @@ fliqt/
 ├── go.mod                     # Go module configuration
 ├── config/                    # Configuration logic
 ├── internal/                  
-│   ├── handler/               # API request handlers
+│   ├── middleware/               # API request middleware
 │   └── repository/            # Data access logic
 └── tests/                     # Test code
 ```

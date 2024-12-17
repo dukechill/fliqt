@@ -30,33 +30,6 @@ services:
       retries: 5
       timeout: 5s
 
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    ports:
-      - "9000:9000"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data
-    volumes:
-      - minio-data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
-  minio-setup:
-    image: minio/mc:latest
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      until (mc alias set myminio http://minio:9000 minioadmin minioadmin && mc ls myminio/fliqt || mc mb myminio/fliqt); do
-        sleep 5;
-      done"
-
   migrate:
     build:
       context: .
@@ -94,20 +67,13 @@ services:
       - PRETTY_LOGS=true
       - TRACER_ENDPOINT=jaeger:4317
       - REDIS_URL=redis://redis:6379
-      - S3_ENDPOINT=http://minio:9000
-      - S3_BUCKET=fliqt
-      - S3_KEY=minioadmin
-      - S3_SECRET=minioadmin
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_healthy
     command: "./dist-main"
 
 volumes:
-  minio-data:
   mysql-data:
   redis-data:
